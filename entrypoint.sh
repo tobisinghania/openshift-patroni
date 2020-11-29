@@ -1,11 +1,15 @@
 #!/bin/bash
 
-if [[ $UID -ge 10000 ]]; then
-    GID=$(id -g)
-    sed -e "s/^postgres:x:[^:]*:[^:]*:/postgres:x:$UID:$GID:/" /etc/passwd > /tmp/passwd
-    cat /tmp/passwd > /etc/passwd
-    rm /tmp/passwd
-fi
+#/fix_permissions_and_start_sshd.sh
+
+#if [[ $UID -ge 10000 ]]; then
+#    GID=$(id -g)
+#    sed -e "s/^postgres:x:[^:]*:[^:]*:/postgres:x:$UID:$GID:/" /etc/passwd > /tmp/passwd
+#    cat /tmp/passwd > /etc/passwd
+#    rm /tmp/passwd
+#fi
+
+cd /home/postgres
 
 cat > /home/postgres/patroni.yml <<__EOF__
 bootstrap:
@@ -33,5 +37,8 @@ postgresql:
 __EOF__
 
 unset PATRONI_SUPERUSER_PASSWORD PATRONI_REPLICATION_PASSWORD
+
+# Link postgres data directory into the home dir
+ln -s /home/postgres_data/pgdata /home/postgres/pgdata
 
 exec /usr/bin/python3 /usr/local/bin/patroni /home/postgres/patroni.yml
