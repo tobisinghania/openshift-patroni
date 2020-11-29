@@ -23,7 +23,7 @@ export DATA_SOURCE_NAME='postgresql://localhost?host=/var/run/postgresql/&user=c
 if [ $ENABLE_PER_DB_EXPORTER = true  ]; then
 	echo "Starting per-db exporter"
 	source /etc/sysconfig/sysconfig.postgres_exporter_pg12_per_db
-	cat $QUERY_FILE_LIST | sed -e 's/#PGBACKREST_INFO_THROTTLE_MINUTES#/${PGBACKREST_INFO_THROTTLE_MINUTES}/g' -e 's/#PG_STAT_STATEMENTS_LIMIT#/${PG_STAT_STATEMENTS_LIMIT}/g' > /tmp/query_perdb.yml
+	cat $QUERY_FILE_LIST | sed -e "s/#PGBACKREST_INFO_THROTTLE_MINUTES#/${PGBACKREST_INFO_THROTTLE_MINUTES}/g" -e "s/#PG_STAT_STATEMENTS_LIMIT#/${PG_STAT_STATEMENTS_LIMIT}/g" > /tmp/query_perdb.yml
 
 	/usr/bin/postgres_exporter --web.listen-address=0.0.0.0:9188 --extend.query-path=/tmp/query_perdb.yml --disable-default-metrics --disable-settings-metrics & disown
 fi
@@ -32,7 +32,7 @@ fi
 if [ $ENABLE_ALL_DB_EXPORTER = true  ]; then
    	echo "Starting all-db exporter"
 	source /etc/sysconfig/sysconfig.postgres_exporter_pg12
-	cat $QUERY_FILE_LIST | sed -e 's/#PGBACKREST_INFO_THROTTLE_MINUTES#/${PGBACKREST_INFO_THROTTLE_MINUTES}/g' -e 's/#PG_STAT_STATEMENTS_LIMIT#/${PG_STAT_STATEMENTS_LIMIT}/g' > /tmp/queries.yml
+	cat $QUERY_FILE_LIST | sed -e "s/#PGBACKREST_INFO_THROTTLE_MINUTES#/${PGBACKREST_INFO_THROTTLE_MINUTES}/g" -e "s/#PG_STAT_STATEMENTS_LIMIT#/${PG_STAT_STATEMENTS_LIMIT}/g" > /tmp/queries.yml
 
 	/usr/bin/postgres_exporter --web.listen-address=0.0.0.0:9187 --extend.query-path=/tmp/queries.yml --disable-default-metrics --disable-settings-metrics & disown
 fi
