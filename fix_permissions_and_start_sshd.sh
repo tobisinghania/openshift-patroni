@@ -88,8 +88,8 @@ fi
 /start_monitoring.sh
 
 
-if [ ! -z "$@" ]; then
-  "$@"
-else	
-  /entrypoint.sh 
-fi  
+#if [ ! -z "$@" ]; then
+#  "$@"
+#else	
+#  /entrypoint.sh 
+#fi  

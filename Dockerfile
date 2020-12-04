@@ -32,6 +32,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && rm percona-release_latest.$(lsb_release -sc)_all.deb
 
 ADD entrypoint.sh /
+ADD init.sh /
 ADD fix_permissions_and_start_sshd.sh /
 ADD install_pg_monitor.sh /
 ADD start_monitoring.sh /
@@ -65,6 +66,6 @@ USER postgres
 #WORKDIR /home/postgres
 
  
-ENTRYPOINT ["/fix_permissions_and_start_sshd.sh"]
+ENTRYPOINT ["/init.sh"]
 
 CMD ["/entrypoint.sh"]
