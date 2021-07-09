@@ -81,7 +81,11 @@ cd /home/postgres
 if [ ! -s /home/postgres/.ssh/known_hosts ] && [ ! -z "$KNOWN_HOSTS" ]; then
    echo "$KNOWN_HOSTS" | jq .[] | xargs -L1 ssh-keyscan -H > /home/postgres/.ssh/known_hosts
    chmod 600 /home/postgres/.ssh/known_hosts   
+elif [ -f $SSH_CONF/known_hosts ]; then 
+   cp $SSH_CONF/known_hosts /home/postgres/.ssh/known_hosts
+   chmod 600 /home/postgres/.ssh/known_hosts   
 fi
+
 
 
 # Start monitoring
