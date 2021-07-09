@@ -78,7 +78,7 @@ fi
 cd /home/postgres
 
 # If KNOWN_HOSTS is set and known hosts file does not exist, create it
-if [ ! -f /home/postgres/.ssh/known_hosts ] && [ ! -z "$KNOWN_HOSTS" ]; then
+if [ ! -s /home/postgres/.ssh/known_hosts ] && [ ! -z "$KNOWN_HOSTS" ]; then
    echo "$KNOWN_HOSTS" | jq .[] | xargs -L1 ssh-keyscan -H > /home/postgres/.ssh/known_hosts
    chmod 600 /home/postgres/.ssh/known_hosts   
 fi
