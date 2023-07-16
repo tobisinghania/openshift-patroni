@@ -10,7 +10,7 @@ cat /tmp/passwd > /etc/passwd
 sed "s/postgres_data/postgres/" /etc/passwd > /tmp/passwd
 cat /tmp/passwd > /etc/passwd
 
-# Create home directory. This is created during runtime to have porper permissions on  openshift
+# Create home directory. This is created during runtime to have proper permissions on openshift
 mkdir /home/postgres
 chmod 700 /home/postgres
 
@@ -79,8 +79,14 @@ cd /home/postgres
 
 # If KNOWN_HOSTS is set and known hosts file does not exist, create it
 if [ ! -s /home/postgres/.ssh/known_hosts ] && [ ! -z "$KNOWN_HOSTS" ]; then
-   echo "$KNOWN_HOSTS" | jq .[] | xargs -L1 ssh-keyscan -H > /home/postgres/.ssh/known_hosts
-   chmod 600 /home/postgres/.ssh/known_hosts   
+     echo "$KNOWN_HOSTS" | jq -r .[] | while read host; do
+         until ssh-keyscan -H $host >> /home/postgres/.ssh/known_hosts; do
+             echo "Could not load key for $host...retrying in 5s"
+	     sleep 5
+         done    
+     done
+     chmod 600 /home/postgres/.ssh/known_hosts   
+
 elif [ -f $SSH_CONF/known_hosts ]; then 
    cp $SSH_CONF/known_hosts /home/postgres/.ssh/known_hosts
    chmod 600 /home/postgres/.ssh/known_hosts   

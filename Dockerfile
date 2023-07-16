@@ -1,4 +1,4 @@
-FROM postgres:12
+FROM postgres:15
 MAINTAINER Tobias Singhania
 
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -11,7 +11,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && wget https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb \
     && dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb \
     && apt-get update \
-    && apt-get install -y pmm2-client  \
+    && apt-get install -y pmm2-client pgbackrest \
     ## Make sure we have a en_US.UTF-8 locale available
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
     && pip3 install setuptools \
@@ -38,7 +38,7 @@ ADD install_pg_monitor.sh /
 ADD start_monitoring.sh /
 
 # Install pgbackrest
-COPY pgbackrest /usr/bin/pgbackrest
+#COPY pgbackrest /usr/bin/pgbackrest
 RUN mkdir -p -m 777 /var/log/pgbackrest \
      && chown postgres:postgres /var/log/pgbackrest \
      && mkdir -p /etc/pgbackrest \
