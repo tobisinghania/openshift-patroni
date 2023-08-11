@@ -29,10 +29,8 @@ Host *
 #   GSSAPIKeyExchange no
 #   GSSAPITrustDNS no
 #   BatchMode no
-#   CheckHostIP yes
 #   AddressFamily any
 #   ConnectTimeout 0
-#   StrictHostKeyChecking ask
 #   IdentityFile ~/.ssh/identity
 #   IdentityFile ~/.ssh/id_rsa
 #   IdentityFile ~/.ssh/id_dsa
@@ -50,6 +48,9 @@ Host *
 #   VisualHostKey no
 #   ProxyCommand ssh -q -W %h:%p gateway.example.com
 #   RekeyLimit 1G 1h
+    CheckHostIP no
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
     SendEnv LANG LC_*
-    HashKnownHosts yes
+    HashKnownHosts false
     GSSAPIAuthentication yes

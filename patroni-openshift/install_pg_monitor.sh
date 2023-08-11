@@ -44,7 +44,7 @@ cp node_exporter/linux/sysconfig.node_exporter /etc/sysconfig/node_exporter
 mkdir -p /etc/postgres_exporter/15
 cp postgres_exporter/linux/crontab.txt /etc/postgres_exporter/15/crontab.txt
 
-mkdir /usr/lib/systemd/system
+mkdir -p /usr/lib/systemd/system
 cp postgres_exporter/linux/crunchy-postgres-exporter\@.service /usr/lib/systemd/system/crunchy_postgres_exporter\@.service
 
 cp postgres_exporter/linux/pg15/sysconfig.postgres_exporter_pg15 /etc/sysconfig/
