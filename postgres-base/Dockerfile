@@ -20,7 +20,7 @@ RUN set -ex; \
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
-ENV GOSU_VERSION 1.16
+ENV GOSU_VERSION 1.17
 RUN set -eux; \
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -79,7 +79,7 @@ RUN set -ex; \
 ENV PG_MAJOR 15
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION 15.3-1.pgdg110+1
+ENV PG_VERSION 15.13-1.pgdg110+1
 
 RUN set -ex; \
 	\
@@ -146,7 +146,7 @@ RUN set -ex; \
 	apt-get install -y --no-install-recommends postgresql-common; \
 	sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf; \
 	apt-get install -y --no-install-recommends \
-		"postgresql-$PG_MAJOR=$PG_VERSION" \
+		"postgresql-$PG_MAJOR=$PG_VERSION" "postgresql-server-dev-$PG_MAJOR=$PG_VERSION" \
 	; \
 	\
 	rm -rf /var/lib/apt/lists/*; \

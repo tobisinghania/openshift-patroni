@@ -1,5 +1,25 @@
-FROM tsdc/postgres:15.3
+# syntax=docker/dockerfile:1
+FROM tsdc/postgres:15.13 as builder
 MAINTAINER Tobias Singhania
+
+RUN apt-get update -y
+RUN apt-get install -y python3-pip postgresql-server-dev-15
+RUN pip3 install pgxnclient
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential              \  
+        ca-certificates curl         \  
+        libzstd-dev                  \  
+        liblz4-dev                   \  
+        libreadline-dev              \  
+        zlib1g-dev                   \  
+        clang-11 llvm-11-dev         \
+        postgresql-server-dev-15    \  
+    && rm -rf /var/lib/apt/lists/*      
+
+RUN pgxn install temporal_tables
+RUN pgxn install pg_repack
+
+FROM tsdc/postgres:15.13
 
 RUN export DEBIAN_FRONTEND=noninteractive \
     && echo 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' > /etc/apt/apt.conf.d/01norecommend \
@@ -13,13 +33,24 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     ## Make sure we have a en_US.UTF-8 locale available
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
     && pip3 install setuptools \
-    && pip3 install 'git+https://github.com/zalando/patroni.git#egg=patroni[kubernetes]' \
+    && pip3 install patroni[kubernetes]==3.3.6 \
+    && echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | tee /etc/apt/sources.list.d/timescaledb.list \
+    && wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - \
+    && apt update && apt-get install -y timescaledb-2-postgresql-15 timescaledb-tools \
+
+
     # Clean up
     && apt-get remove -y python3-pip python3-wheel \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /root/.cache
     #&& rm percona-release_latest.$(lsb_release -sc)_all.deb
+
+
+ARG PG_MAJOR=15
+COPY --from=builder /usr/lib/postgresql/${PG_MAJOR}/lib/       /usr/lib/postgresql/${PG_MAJOR}/lib/
+COPY --from=builder /usr/lib/postgresql/${PG_MAJOR}/bin/       /usr/lib/postgresql/${PG_MAJOR}/bin/
+COPY --from=builder /usr/share/postgresql/${PG_MAJOR}/extension/ /usr/share/postgresql/${PG_MAJOR}/extension/
 
 ADD entrypoint.sh /run/
 ADD init.sh /run/
