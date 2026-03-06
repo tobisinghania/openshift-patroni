@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pgxn install temporal_tables
 RUN pgxn install pg_repack
+RUN pgxn install vector
 
 FROM tsdc/postgres:15.3-v2
 

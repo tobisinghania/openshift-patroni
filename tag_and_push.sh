@@ -1,5 +1,5 @@
 PG_BASE="tsdc/postgres:15.7-v2"
-IMAGE="tsdc/openshift-patroni:15.7-v5"
+IMAGE="tsdc/openshift-patroni:15.7-v6"
 
 
 set -e
