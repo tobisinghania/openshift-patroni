@@ -16,6 +16,7 @@ The image is built in two layers:
 | Patroni 3.3.6 | HA cluster management (Kubernetes DCS) |
 | pgBackRest | Backup and restore |
 | TimescaleDB 2 | Time-series extension |
+| pgvector | Vector similarity search |
 | pg_repack | Online table repacking (remove bloat without locks) |
 | temporal_tables | Temporal table versioning |
 | Prometheus node_exporter | Host metrics |
