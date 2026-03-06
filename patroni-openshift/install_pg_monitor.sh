@@ -51,7 +51,7 @@ cp postgres_exporter/linux/pg15/sysconfig.postgres_exporter_pg15 /etc/sysconfig/
 cp postgres_exporter/linux/pg15/sysconfig.postgres_exporter_pg15_per_db /etc/sysconfig/
 cp postgres_exporter/linux/pgbackrest-info.sh /usr/bin/pgbackrest-info.sh
 cp postgres_exporter/linux/queries_*.yml /etc/postgres_exporter/15/
-cp postgres_exporter/common/pg15/setup.sql /etc/postgres_exporter/15/
+cp postgres_exporter/common/setup.sql /etc/postgres_exporter/15/
 cp postgres_exporter/common/pg15/queries_*.yml /etc/postgres_exporter/15/
 cp postgres_exporter/common/queries_*.yml /etc/postgres_exporter/15/
 

@@ -11,6 +11,7 @@
 # default value.
 
 Port 2222
+SetEnv LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
 #AddressFamily any
 #ListenAddress 0.0.0.0
 #ListenAddress ::
@@ -30,7 +31,9 @@ HostKey /home/postgres/sshd/ssh_host_ed25519_key
 
 #LoginGraceTime 2m
 #PermitRootLogin prohibit-password
-#StrictModes yes
+# Disabled for OpenShift compatibility: the home directory is owned by the
+# build-time UID and is group-writable (g=u) for the random runtime UID.
+StrictModes no
 #MaxAuthTries 6
 #MaxSessions 10
 

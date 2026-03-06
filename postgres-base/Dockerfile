@@ -1,13 +1,14 @@
 
 FROM debian:bullseye-slim
 
-# explicitly set user/group IDs
+# Create postgres user with its own group initially (required by the Debian
+# postgresql package which refuses to install if postgres has root as primary group).
+# The primary group is switched to 0 (root) after installation for OpenShift
+# compatibility — OpenShift assigns a random UID at runtime but always adds it
+# to group 0, so group-writable files are accessible.
 RUN set -eux; \
-	groupadd -r postgres --gid=1000620000; \
-# https://salsa.debian.org/postgresql/postgresql-common/blob/997d842ee744687d99a2b2d95c1083a2615c79e8/debian/postgresql-common.postinst#L32-35
-	useradd --no-log-init -r -g postgres --uid=1000620000 --home-dir=/home/postgres --shell=/bin/bash postgres; \
-# also create the postgres user's home directory with appropriate permissions
-# see https://github.com/docker-library/postgres/issues/274
+	groupadd -r postgres; \
+	useradd --no-log-init -r -g postgres --home-dir=/home/postgres --shell=/bin/bash postgres; \
 	mkdir -p /home/postgres; \
 	chown -R postgres:postgres /home/postgres
 
@@ -65,21 +66,16 @@ RUN set -eux; \
 RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
-# pub   4096R/ACCC4CF8 2011-10-13 [expires: 2019-07-02]
-#       Key fingerprint = B97B 0AFC AA1A 47F0 44F2  44A0 7FCC 7D46 ACCC 4CF8
-# uid                  PostgreSQL Debian Repository
-	key='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8'; \
-	export GNUPGHOME="$(mktemp -d)"; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends ca-certificates wget; \
+	rm -rf /var/lib/apt/lists/*; \
 	mkdir -p /usr/local/share/keyrings/; \
-	gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$key"; \
-	gpg --batch --export --armor "$key" > /usr/local/share/keyrings/postgres.gpg.asc; \
-	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME"
+	wget -q -O /usr/local/share/keyrings/postgres.gpg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
 
 ENV PG_MAJOR 15
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
-ENV PG_VERSION 15.13-1.pgdg110+1
+ENV PG_VERSION 15.17-1.pgdg11+1
 
 RUN set -ex; \
 	\
@@ -170,11 +166,18 @@ RUN set -eux; \
 	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/share/postgresql/postgresql.conf.sample; \
 	grep -F "listen_addresses = '*'" /usr/share/postgresql/postgresql.conf.sample
 
-RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
+# Switch postgres primary group to root (0) for OpenShift compatibility.
+# This must happen after postgresql is installed (Debian package rejects root as primary group).
+RUN usermod -g 0 postgres \
+	&& chown -R postgres:0 /home/postgres \
+	&& chmod -R g=u /home/postgres \
+	&& chmod g=u /etc/passwd
+
+RUN mkdir -p /var/run/postgresql && chown -R postgres:0 /var/run/postgresql && chmod 2775 /var/run/postgresql
 
 ENV PGDATA /home/postgres/pgdata/pgroot_15/data
-# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
-RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
+# this 775 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
+RUN mkdir -p "$PGDATA" && chown -R postgres:0 "$PGDATA" && chmod 775 "$PGDATA"
 VOLUME /home/postgres/pgdata/pgroot_15/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
